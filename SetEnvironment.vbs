@@ -4,7 +4,7 @@
 '                             @Email: hexiyou.cn@gmail.com                                    '
 '                                  @date:2015-06                                              '
 '                                                                                             '
-'       description��Add or Remove Path Environment or setup Others Environment variables.    '
+'       description：Add or Remove Path Environment or setup Others Environment variables.    '
 '                   (Java Environment etc..)                                                  '
 '                                                                                             '
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
@@ -63,6 +63,12 @@ Function Main()
     Argvc = argDictionary.Count
     Select Case Argvc
         Case 3
+		Select Case LCase(argDictionary.Item(0))
+			Case "-env","--env","-set","--set"
+			Call SetEnv(argDictionary.Item(1),argDictionary.Item(2))
+			Case Else
+            Call PrintMsg("Involid Command Option, please check!",True)
+		End Select
         Case 2
         Select Case LCase(argDictionary.Item(0))
             Case "-add","-append","--add","--append"
@@ -87,7 +93,7 @@ Function Main()
     End Select
 End Function
 
-' Method��Add String To %PATH%
+' Method：Add String To %PATH%
 Sub AddPath(pathStr)
     Call Init()
     Dim oldPath,newPath,perAddPath
@@ -108,7 +114,7 @@ End Sub
 Sub parseSingleParam(args)
     Select Case args
         Case "-h","/?","--help"
-        Call PrintUsage("Script example��")
+        Call PrintUsage("Script example：")
         Case "-export","--export"
         Call ExportPath("pathenv_export.txt")
         Case "-about"
@@ -123,7 +129,7 @@ End Sub
 
 
 '
-'' description �� insert path string at %PATH% beginning
+'' description ： insert path string at %PATH% beginning
 Sub InsertPath(pathStr)
     Call Init()
     Dim oldPath,newPath,perAddPath
@@ -204,7 +210,7 @@ Sub ExportHelpInfo(helpFile)
     "-insert, -prepend	[Path] Insert directory Path To %PATH% Var at The Beginging of the value" & vbCrLf & vbCrLf & _
     "-query	Path Query path string in %PATH% Var,this operation allow use wildcard (* and ?)" & vbCrLf & vbCrLf & _
     "-export  [Filename|FilePath]   Export the %PATH% Var to one file.(include USER Environment)" & vbCrLf & vbCrLf & _
-    "$ENV_Item  Value   Set value for other Environment VARS except %PATH% var" & vbCrLf & vbCrLf & _
+    "-env $ENV_Item  Value   Set value for other Environment VARS except %PATH% var" & vbCrLf & vbCrLf & _
     "-read, --read  $ENV_Item   Read value of Environment VARS include %PATH% var" & vbCrLf & vbCrLf & _
     "-h, --help, /?   Show this help message box"
     file.Close
@@ -216,10 +222,21 @@ End Sub
 Sub ReadEnv(envItem)
     Call Init()
     Call PrintMsg(sysEnv.Item(envItem), False)
+	If quietMode=True Then
+		Call PrintMsg(vbCrLf, False)
+	End If
     '''--------------- print user env,by user custom
-    'Call PrintMsg(userEnv.Item(envItem), True)
+    Call PrintMsg(userEnv.Item(envItem), True)
 End Sub
 
+'设置单项环境变量为固定值
+Sub SetEnv(envItem,envValue)
+    Call Init()
+	If envItem<>"" AND envValue<>"" Then
+		sysEnv.Item(envItem) = envValue
+	End If
+	Call PrintMsg("The Environment Var """ & envItem & """ has been set to." & vbCrLf & "+" & Space(8) & envValue, True)
+End Sub
 
 Sub showAbout()
     PrintMsg "This is an Environment Setting Tool use VBScript programing" & vbCrLf & vbCrLf & _
@@ -288,14 +305,14 @@ End Function
 
 
 Sub PrintUsage(Msg)
-    MsgBox Msg & vbCrLf & "Usage: " &vbCrLf &_
+    Wscript.Echo Msg & vbCrLf & "Usage: " &vbCrLf &_
     "(FilePath|FolderPath) Add file or folder Absloute path to %PATH% Var,support mouse drag operation" & vbCrLf & vbCrLf &_
     "-add, -append	[Path] Add directory Path To %PATH% Var" & vbCrLf & vbCrLf &_
     "-remove, -del	[Path] Add directory Path From %PATH% Var" &vbCrLf & vbCrLf &_
     "-insert, -prepend	[Path] Insert directory Path To %PATH% Var at The Beginging of the value" & vbCrLf & vbCrLf & _
     "-query	Path Query path string in %PATH% Var,this operation allow use wildcard (* and ?)" & vbCrLf & vbCrLf & _
     "-export  [Filename|FilePath]   Export the %PATH% Var to one file.(include USER Environment)" & vbCrLf & vbCrLf & _
-    "$ENV_Item  Value   Set value for other Environment VARS except %PATH% var" & vbCrLf & vbCrLf & _
+    "-env $ENV_Item  Value   Set value for other Environment VARS except %PATH% var" & vbCrLf & vbCrLf & _
     "-read, --read  $ENV_Item   Read value of Environment VARS include %PATH% var" & vbCrLf & vbCrLf & _
     "-h, --help, /?   Show this help message box" _
     ,64,"Usage"
